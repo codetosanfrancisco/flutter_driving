@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import '../../models/Lesson.dart';
+import '../../data/Lessons.dart';
+import '../components/DetailPage.dart';
 
 class ListPage extends StatefulWidget {
   ListPage({Key key, this.title}) : super(key: key);
@@ -12,6 +15,8 @@ class ListPage extends StatefulWidget {
 }
 
 class ListPageState extends State<ListPage> {
+  List<Lesson> lessons;
+
   AppBar getTopAppBar(widget) {
     return AppBar(
       backgroundColor: Color.fromRGBO(58, 66, 86, 1.0),
@@ -50,35 +55,60 @@ class ListPageState extends State<ListPage> {
         ]),
   );
 
-  final makeListTile = ListTile(
-    title: Text("Introduction to Driving!",
-        style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-    subtitle: Row(
-      children: <Widget>[
-        Icon(Icons.linear_scale, color: Colors.yellowAccent),
-        Text(" Intermediate", style: TextStyle(color: Colors.white))
-      ],
-    ),
-    trailing: Icon(Icons.keyboard_arrow_right, color: Colors.white, size: 30.0),
-    leading: Container(
-      padding: EdgeInsets.only(right: 12.0),
-      decoration: BoxDecoration(
-          border: Border(right: BorderSide(width: 1.0, color: Colors.white24))),
-      child: Icon(
-        Icons.autorenew,
-        color: Colors.white,
+  ListTile makeListTile(Lesson lesson) {
+    return ListTile(
+      onTap: () {
+        Navigator.push(context, MaterialPageRoute(builder: (context) {
+          return DetailPage(lesson: lesson);
+        }));
+      },
+      title: Text(lesson.title,
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+      subtitle: Row(
+        children: <Widget>[
+          Expanded(
+            flex: 1,
+            child: Container(
+              child: LinearProgressIndicator(
+                  backgroundColor: Color.fromRGBO(209, 224, 224, 0.2),
+                  value: lesson.indicatorValue,
+                  valueColor: AlwaysStoppedAnimation(Colors.green)),
+            ),
+          ),
+          Expanded(
+            child: Padding(
+              padding: EdgeInsets.only(left: 10.0),
+              child: Text(
+                lesson.level,
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+          )
+        ],
       ),
-    ),
-    contentPadding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
-  );
+      trailing:
+          Icon(Icons.keyboard_arrow_right, color: Colors.white, size: 30.0),
+      leading: Container(
+        padding: EdgeInsets.only(right: 12.0),
+        decoration: BoxDecoration(
+            border:
+                Border(right: BorderSide(width: 1.0, color: Colors.white24))),
+        child: Icon(
+          Icons.autorenew,
+          color: Colors.white,
+        ),
+      ),
+      contentPadding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
+    );
+  }
 
-  makeCard() {
+  Card makeCard(Lesson lesson) {
     return Card(
       elevation: 8.0,
       margin: EdgeInsets.symmetric(horizontal: 10.0, vertical: 6.0),
       child: Container(
         decoration: BoxDecoration(color: Color.fromRGBO(64, 75, 96, .9)),
-        child: makeListTile,
+        child: makeListTile(lesson),
       ),
     );
   }
@@ -88,12 +118,18 @@ class ListPageState extends State<ListPage> {
       child: ListView.builder(
         scrollDirection: Axis.vertical,
         shrinkWrap: true,
-        itemCount: 10,
+        itemCount: lessons.length,
         itemBuilder: (BuildContext context, int index) {
-          return makeCard();
+          return makeCard(lessons[index]);
         },
       ),
     );
+  }
+
+  @override
+  void initState() {
+    lessons = getLessons();
+    super.initState();
   }
 
   @override
